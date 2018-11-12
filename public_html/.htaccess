@@ -1,0 +1,37 @@
+Options +FollowSymlinks
+RewriteEngine On
+RewriteBase /
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L]
+
+#Redirect https://proust.psikologi.ui.ac.id/index.php http://proust.psikologi.ui.ac.id/index.php
+#Redirect /index.html http://proust.psikologi.ui.ac.id/index.php
+
+Redirect https://proust.ui.ac.id/index.php http://proust.ui.ac.id/index.php
+Redirect /index.html http://proust.ui.ac.id/index.php
+
+########## Begin - File injection protection
+RewriteCond %{REQUEST_METHOD} GET
+RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=http:// [OR]
+RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=(\.\.//?)+ [OR]
+RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=/([a-z0-9_.]//?)+ [NC]
+RewriteCond %{HTTP_USER_AGENT} (?:ahrefs|blekko|blex|dot|exa|giga|mj12|roger|seokicks-ro|site)bot [NC]
+RewriteRule .* - [F]
+########## End - File injection protection
+#URL encoding based LFI
+RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=http%3A%2F%2F [OR]
+
+SetEnvIfNoCase User-Agent .*rogerbot.* bad_bot
+SetEnvIfNoCase User-Agent .*spbot.* bad_bot
+SetEnvIfNoCase User-Agent .*exabot.* bad_bot
+SetEnvIfNoCase User-Agent .*mj12bot.* bad_bot
+SetEnvIfNoCase User-Agent .*dotbot.* bad_bot
+SetEnvIfNoCase User-Agent .*gigabot.* bad_bot
+SetEnvIfNoCase User-Agent .*ahrefsbot.* bad_bot
+SetEnvIfNoCase User-Agent .*sitebot.* bad_bot
+<Limit GET POST HEAD>
+Order Allow,Deny
+Allow from all
+Deny from env=bad_bot
+</Limit>
